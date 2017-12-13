@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zr.dao.DeptMapper">
+  <resultMap id="BaseResultMap" type="cn.zr.entity.Dept">
+    <id column="DEPTNO" jdbcType="NUMERIC" property="deptno" />
+    <result column="DNAME" jdbcType="VARCHAR" property="dname" />
+    <result column="DLOC" jdbcType="VARCHAR" property="dloc" />
+    <collection property="emps" ofType="cn.zr.entity.Emp">
+    	<result column="EMPNO" jdbcType="NUMERIC" property="empno" />
+	    <result column="ENAME" jdbcType="VARCHAR" property="ename" />
+	    <result column="EJOB" jdbcType="VARCHAR" property="ejob" />
+	    <result column="ESEX" jdbcType="VARCHAR" property="esex" />
+	    <result column="EAGE" jdbcType="NUMERIC" property="eage" />
+    </collection>
+    
+  </resultMap>
+  <sql id="Base_Column_List">
+    DEPTNO, DNAME,DLOC
+  </sql>
+  <select id="findAll" resultMap="BaseResultMap">
+  	select * from DEPT
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+   	select 
+    d.deptno DEPTNO, 
+    d.dname DNAME,
+    d.dloc  DLOC, 
+    e.empno EMPNO, 
+    e.ename ENAME, 
+    e.ejob EJOB, 
+    e.esex ESEX, 
+    e.eage EAGE 
+    from DEPT d,EMP e 
+    where 
+    e.deptno=d.deptno and 
+    d.DEPTNO = #{deptno,jdbcType=DECIMAL}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from DEPT
+    where DEPTNO = #{deptno,jdbcType=NUMERIC}
+  </delete>
+  <insert id="insert" parameterType="cn.zr.entity.Dept">
+    insert into DEPT (DEPTNO, DNAME)
+    values (SEQ_DEPT.nextval, #{dname,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.zr.entity.Dept">
+    insert into DEPT
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+        DEPTNO,
+      <if test="dname != null">
+        DNAME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+        SEQ_DEPT.nextval,
+      <if test="dname != null">
+        #{dname,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.zr.entity.Dept">
+    update DEPT
+    <set>
+      <if test="dname != null">
+        DNAME = #{dname,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where DEPTNO = #{deptno,jdbcType=NUMERIC}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.zr.entity.Dept">
+    update DEPT
+    set DNAME = #{dname,jdbcType=VARCHAR}
+    where DEPTNO = #{deptno,jdbcType=NUMERIC}
+  </update>
+</mapper>

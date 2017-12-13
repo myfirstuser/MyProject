@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zr.dao.EmpMapper">
+  <resultMap id="BaseResultMap" type="cn.zr.entity.Emp">
+    <result column="EMPNO" jdbcType="NUMERIC" property="empno" />
+    <result column="ENAME" jdbcType="VARCHAR" property="ename" />
+    <result column="EJOB" jdbcType="VARCHAR" property="ejob" />
+    <result column="ESEX" jdbcType="VARCHAR" property="esex" />
+    <result column="EAGE" jdbcType="NUMERIC" property="eage" />
+    <association property="dept" javaType="cn.zr.entity.Dept">
+    	<id column="DEPTNO" jdbcType="NUMERIC" property="deptno" />
+	    <result column="DNAME" jdbcType="VARCHAR" property="dname" />
+	     <result column="DLOC" jdbcType="VARCHAR" property="dloc" />
+	    <collection property="emps" ofType="cn.zr.entity.Emp">
+	    	<result column="EMPNO" jdbcType="NUMERIC" property="empno" />
+		    <result column="ENAME" jdbcType="VARCHAR" property="ename" />
+		    <result column="EJOB" jdbcType="VARCHAR" property="ejob" />
+		    <result column="ESEX" jdbcType="VARCHAR" property="esex" />
+		    <result column="EAGE" jdbcType="NUMERIC" property="eage" />
+	    </collection>
+    </association>
+    <!-- <result column="DEPTNO" jdbcType="NUMERIC" property="deptno" />
+    -->
+  </resultMap>
+  <select id="selectEmp" parameterType="java.lang.Long" resultMap="BaseResultMap">
+  	select * from Emp where EMPNO=#{emono}
+  </select>
+  <insert id="insert" parameterType="cn.zr.entity.Emp">
+    insert into EMP (EMPNO, ENAME, EJOB, 
+      ESEX, EAGE, DEPTNO)
+    values (#{empno,jdbcType=NUMERIC}, #{ename,jdbcType=VARCHAR}, #{ejob,jdbcType=VARCHAR}, 
+      #{esex,jdbcType=VARCHAR}, #{eage,jdbcType=NUMERIC}, #{deptno,jdbcType=NUMERIC})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.zr.entity.Emp">
+    insert into EMP
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+        EMPNO,
+      <if test="ename != null">
+        ENAME,
+      </if>
+      <if test="ejob != null">
+        EJOB,
+      </if>
+      <if test="esex != null">
+        ESEX,
+      </if>
+      <if test="eage != null">
+        EAGE,
+      </if>
+      <if test="deptno != null">
+        DEPTNO,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+        SEQ_EMP.nextval,
+      <if test="ename != null">
+        #{ename,jdbcType=VARCHAR},
+      </if>
+      <if test="ejob != null">
+        #{ejob,jdbcType=VARCHAR},
+      </if>
+      <if test="esex != null">
+        #{esex,jdbcType=VARCHAR},
+      </if>
+      <if test="eage != null">
+        #{eage,jdbcType=NUMERIC},
+      </if>
+      <if test="deptno != null">
+        #{deptno,jdbcType=NUMERIC},
+      </if>
+    </trim>
+  </insert>
+</mapper>

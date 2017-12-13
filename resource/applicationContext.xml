@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:jms="http://www.springframework.org/schema/jms"
+	xmlns:lang="http://www.springframework.org/schema/lang"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-4.1.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.1.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.1.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.1.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-4.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd">
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="locations">
+			<list>
+				<value>classpath:db.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 配置数据源  datasource 
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName">
+			<value>${db.driverClassName}</value>
+		</property>
+		<property name="url">
+			<value>${db.url}</value>
+		</property>
+		<property name="username">
+			<value>${db.username}</value>
+		</property>
+		<property name="password">
+			<value>${db.password}</value>
+		</property>
+	</bean> -->
+	
+	<!-- 阿里 druid数据库连接池 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">  
+         <!-- 数据库基本信息配置 -->
+         <property name="url" value="${db.url}" />  
+         <property name="username" value="${db.username}" />  
+         <property name="password" value="${db.password}" />  
+         <property name="driverClassName" value="${db.driverClassName}" />  
+         <property name="filters" value="${filters}" />  
+   		 <!-- 最大并发连接数 -->
+         <property name="maxActive" value="${maxActive}" />
+         <!-- 初始化连接数量 -->
+         <property name="initialSize" value="${initialSize}" />
+         <!-- 配置获取连接等待超时的时间 -->
+         <property name="maxWait" value="${maxWait}" />
+         <!-- 最小空闲连接数 -->
+         <property name="minIdle" value="${minIdle}" />  
+   		 <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+         <property name="timeBetweenEvictionRunsMillis" value="${timeBetweenEvictionRunsMillis}" />
+         <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+         <property name="minEvictableIdleTimeMillis" value="${minEvictableIdleTimeMillis}" />  
+         <property name="validationQuery" value="${validationQuery}" />  
+         <property name="testWhileIdle" value="${testWhileIdle}" />  
+         <property name="testOnBorrow" value="${testOnBorrow}" />  
+         <property name="testOnReturn" value="${testOnReturn}" />  
+         <property name="maxOpenPreparedStatements" value="${maxOpenPreparedStatements}" />
+         <!-- 打开removeAbandoned功能 -->
+         <property name="removeAbandoned" value="${removeAbandoned}" />
+         <!-- 1800秒，也就是30分钟 -->
+         <property name="removeAbandonedTimeout" value="${removeAbandonedTimeout}" />
+         <!-- 关闭abanded连接时输出错误日志 -->   
+         <property name="logAbandoned" value="${logAbandoned}" />
+	</bean>  
+
+	<!-- 配置mybitasSqlSessionFactoryBean -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- 加载mybatis配置文件方式加载实体类映射 -->
+		<!-- <property name="configLocation" value="classpath:myBatis-config.xml"></property> -->
+		<property name="mapperLocations">
+			<list>
+				<value>classpath:cn/zr/dao/DeptMapper.xml</value>
+				<value>classpath:cn/zr/dao/EmpMapper.xml</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- 配置SqlSessionTemplate -->
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+	    <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<!-- 事务配置 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 事务规则 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!-- 对get/load/search开头的方法要求只读事务 -->
+			<tx:method name="get*" propagation="SUPPORTS"
+				read-only="true" />
+			<tx:method name="load*" propagation="SUPPORTS"
+				read-only="true" />
+			<tx:method name="search*" propagation="SUPPORTS"
+				read-only="true" />
+			<tx:method name="find*" read-only="true" />
+			<tx:method name="query*" read-only="true" />
+			<!-- 对其它方法要求事务处理提交 -->
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="merge*" propagation="REQUIRED" />
+			<tx:method name="del*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="do*" propagation="REQUIRED" />
+			<tx:method name="*" propagation="REQUIRED" read-only="true" />
+			<!-- 关于事务回滚的问题:
+				由于Spring与Hibernate类型的Dao已经整合,所以在面向切面编程的过程中
+				只有当Spring感知到异常以后才能被切面拦截,并执行回滚操作,而实际情况是
+				我们往往需要拦截一些继承runtimeException的异常转而编程Exception的
+				异常,然而这个恰恰违反了Spring只能拦截runtimeException的初衷,因此
+				我们必须在配置文件中明确指定,拦截到哪种异常Spring需要做回滚操作
+				rollback-for的作用就是明确指定需要回滚的拦截异常名
+			<tx:method name="*" propagation="REQUIRED" rollback-for="DBLinkException"/>
+			-->
+		</tx:attributes>
+	</tx:advice>
+	<aop:config>
+		<!-- 事务切面 -->
+		<!-- 切入点 -->
+		<!-- execution表达式:(modifies-pattern? ret-type-pattern declaring-type-pattern? name-pattern(param-pattern) throws-pattern?) -->
+		<!-- 公共的方法，任意返回值，无声明类型，cn.zr.service包下及子目录下任意类的任意方法(参数无限制) -->
+		<aop:pointcut id="txPointcut"
+			expression="execution(public * cn.zr.dao..*.*(..))" />
+		<!-- 切入点/增强类 -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut" />
+	</aop:config>
+	
+	<!-- 支持spring注解 -->
+	<context:annotation-config/>
+	<context:component-scan base-package="cn.zr.dao,cn.zr.entity,cn.zr.service,cn.zr.springmvc"></context:component-scan>
+
+	<!-- Dao配置 -->
+	<!-- 采用SqlSessionTemplate的配置Dao
+	<bean id="empDao" class="cn.zr.oa.dao.impl.EmployeeDaoImpl">
+		<property name="sqlSessionTemplate" ref="sqlSessionTemplate"/>
+	</bean> 
+	<bean id="deptDao" class="cn.zr.oa.dao.impl.DepartmentDaoImpl">
+		<property name="sqlSessionTemplate" ref="sqlSessionTemplate"/>
+	</bean>
+	<bean id="positionDao" class="cn.zr.oa.dao.impl.PositionDaoImpl">
+		<property name="sqlSessionTemplate" ref="sqlSessionTemplate"/>
+	</bean>
+	-->
+	<!-- 通过mapperInterface属性注入对应的Dao接口，不能是Dao实现类，每个Dao接口都要配置一个对应bean，这里可以去掉Dao实现类了，但class必须配置为：MapperFactoryBean
+	<bean id="empDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="cn.zr.oa.dao.EmployeeDao"/>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean> -->
+	<!-- 使用MapperScannerConfigurer简化dao配置，没有id，可以把dao的实现类去掉，service中可以通过注解@Autowired注入dao实例 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- <property name="sqlSessionFactory" ref="sqlSessionFactory"/> -->
+		<property name="sqlSessionTemplateBeanName" value="sqlSessionTemplate"></property>
+		<property name="basePackage" value="cn.zr.dao"/>
+	</bean>
+
+
+
+</beans>
